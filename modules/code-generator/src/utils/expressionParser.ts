@@ -162,12 +162,10 @@ export function parseExpressionGetKeywords(expr: string | null | undefined): str
     const keywordVars = new OrderedSet<string>();
 
     const ast = parser.parse(`!(${expr});`, {
-      plugins: [
-        'jsx',
-      ],
+      plugins: ['jsx'],
     });
 
-    const addIdentifierIfNeeded = (x: Record<string, unknown> | number | null | undefined) => {
+    const addIdentifierIfNeeded = (x: any) => {
       if (typeof x === 'object' && isIdentifier(x) && JS_KEYWORDS.includes(x.name)) {
         keywordVars.add(x.name);
       }
@@ -216,10 +214,7 @@ export function parseExpressionGetGlobalVariables(
 
     const ast = parser.parse(`!(${expr});`);
 
-    const addUndeclaredIdentifierIfNeeded = (
-      x: Record<string, unknown> | number | null | undefined,
-      path: NodePath<Node>,
-    ) => {
+    const addUndeclaredIdentifierIfNeeded = (x: any, path: NodePath<Node>) => {
       if (typeof x === 'object' && isIdentifier(x) && !path.scope.hasBinding(x.name)) {
         undeclaredVars.add(x.name);
       }

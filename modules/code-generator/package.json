@@ -1,5 +1,5 @@
 {
-  "name": "@alilc/lowcode-code-generator",
+  "name": "zz-lowcode-code-generator",
   "version": "1.1.2",
   "description": "出码引擎 for LowCode Engine",
   "license": "MIT",
@@ -50,12 +50,6 @@
   "standard-version": {
     "skip": {
       "changelog": true
-    }
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
   "lint-staged": {
@@ -144,5 +138,5 @@
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
-  "repository": "git@github.com:alibaba/lowcode-engine.git"
+  "repository": ""
 }

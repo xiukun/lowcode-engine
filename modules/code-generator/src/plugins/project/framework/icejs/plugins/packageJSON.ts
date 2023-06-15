@@ -60,6 +60,7 @@ const pluginFactory: BuilderComponentPluginFactory<IceJsPackageJsonPluginConfig>
       version: cfg?.packageVersion || '0.1.5',
       description: '轻量级模板，使用 JavaScript，仅包含基础的 Layout。',
       dependencies: {
+        antd: '4.24.8',
         moment: '^2.24.0',
         react: '^16.4.1',
         'react-dom': '^16.4.1',
@@ -68,6 +69,7 @@ const pluginFactory: BuilderComponentPluginFactory<IceJsPackageJsonPluginConfig>
         'intl-messageformat': '^9.3.6',
         '@ice/store': '^1.4.3',
         '@loadable/component': '^5.15.2',
+        'zhizhou-material': '^2.0.3',
 
         // 数据源相关的依赖:
         ...buildDataSourceDependencies(ir, cfg?.datasourceConfig),
