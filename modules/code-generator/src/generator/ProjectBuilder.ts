@@ -25,7 +25,6 @@ interface IModuleInfo {
 }
 
 export interface ProjectBuilderInitOptions {
-
   /** 项目模板 */
   template: IProjectTemplate;
 
@@ -174,6 +173,16 @@ export class ProjectBuilder implements IProjectBuilder {
         files,
       });
     }
+    // add menu logic
+    // menu
+    if (parseResult.globalRouter && builders.router) {
+      const { files } = await builders.menu.generateModule(parseResult.globalRouter);
+
+      buildResult.push({
+        path: this.template.slots.menu.path,
+        files,
+      });
+    }
 
     // entry
     if (parseResult.project && builders.entry) {
@@ -304,8 +313,9 @@ export class ProjectBuilder implements IProjectBuilder {
     return finalResult;
   }
 
-  private createModuleBuilders(extraContextData: Record<string, unknown> = {}):
-    Record<string, IModuleBuilder> {
+  private createModuleBuilders(
+    extraContextData: Record<string, unknown> = {},
+  ): Record<string, IModuleBuilder> {
     const builders: Record<string, IModuleBuilder> = {};
 
     Object.keys(this.plugins).forEach((pluginName) => {

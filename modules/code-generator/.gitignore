@@ -9,7 +9,7 @@ deploy-space/packages
 deploy-space/.env
 /demo/
 /demo-output*/
-/generated/
+/generatedPages/
 
 # IDE
 .vscode

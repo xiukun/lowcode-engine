@@ -32,7 +32,9 @@ function buildAll() {
     () => {
       console.log('all done.');
     },
-    () => {
+    (err) => {
+      console.log('--------------------------');
+      console.log(err);
       process.exit(1);
     },
   );

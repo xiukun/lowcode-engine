@@ -69,7 +69,7 @@ const pluginFactory: BuilderComponentPluginFactory<IceJsPackageJsonPluginConfig>
         'intl-messageformat': '^9.3.6',
         '@ice/store': '^1.4.3',
         '@loadable/component': '^5.15.2',
-        'zhizhou-material': '^2.0.3',
+        'zhizhou-material': '^0.2.3',
 
         // 数据源相关的依赖:
         ...buildDataSourceDependencies(ir, cfg?.datasourceConfig),

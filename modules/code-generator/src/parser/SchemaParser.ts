@@ -32,7 +32,7 @@ import {
 import { SUPPORT_SCHEMA_VERSION_LIST } from '../const';
 
 import { getErrorMessage } from '../utils/errors';
-import { handleSubNodes, isValidContainerType, ContainerType } from '../utils/schema';
+import { handleSubNodes, isValidContainerType } from '../utils/schema';
 import { uniqueArray } from '../utils/common';
 import { componentAnalyzer } from '../analyzer/componentAnalyzer';
 import { ensureValidClassName } from '../utils/validate';
@@ -106,11 +106,6 @@ function processChildren(schema: IPublicTypeNodeSchema): void {
   }
 }
 
-function getInternalDep(internalDeps: Record<string, IInternalDependency>, depName: string) {
-  const dep = internalDeps[depName];
-  return (dep && dep.type !== InternalDependencyType.PAGE) ? dep : null;
-}
-
 export class SchemaParser implements ISchemaParser {
   validate(schema: IPublicTypeProjectSchema): boolean {
     if (SUPPORT_SCHEMA_VERSION_LIST.indexOf(schema.version) < 0) {
@@ -125,57 +120,74 @@ export class SchemaParser implements ISchemaParser {
     const compDeps: Record<string, IExternalDependency> = {};
     const internalDeps: Record<string, IInternalDependency> = {};
     let utilsDeps: IExternalDependency[] = [];
-
-    const schema = this.decodeSchema(schemaSrc);
-
-    // 解析三方组件依赖
-    schema.componentsMap.forEach((info: any) => {
-      if (info.componentName) {
-        compDeps[info.componentName] = {
-          ...info,
-          dependencyType: DependencyType.External,
-          componentName: info.componentName,
-          exportName: info.exportName ?? info.componentName,
-          version: info.version || '*',
-          destructuring: info.destructuring ?? false,
-        };
-      }
-    });
-
-    let containers: IContainerInfo[];
-    // Test if this is a lowcode component without container
-    if (schema.componentsTree.length > 0) {
-      const firstRoot: IPublicTypeContainerSchema = schema.componentsTree[0] as IPublicTypeContainerSchema;
-
-      if (!firstRoot.fileName && !isValidContainerType(firstRoot)) {
-        // 整个 schema 描述一个容器，且无根节点定义
-        const container: IContainerInfo = {
-          ...firstRoot,
-          ...defaultContainer,
-          props: firstRoot.props || defaultContainer.props,
-          css: firstRoot.css || defaultContainer.css,
-          moduleName: (firstRoot as IContainerInfo).moduleName || defaultContainer.moduleName,
-          children: schema.componentsTree as IPublicTypeNodeSchema[],
-        };
-        containers = [container];
-      } else {
-        // 普通带 1 到多个容器的 schema
-        containers = schema.componentsTree.map((n) => {
-          const subRoot = n as IPublicTypeContainerSchema;
-          const container: IContainerInfo = {
-            ...subRoot,
-            componentName: getRootComponentName(subRoot.componentName, compDeps),
-            containerType: subRoot.componentName,
-            moduleName: ensureValidClassName(subRoot.componentName === ContainerType.Component ?
-              subRoot.fileName : changeCase.pascalCase(subRoot.fileName)),
-          };
-          return container;
-        });
-      }
-    } else {
-      throw new CodeGeneratorError("Can't find anything to generate.");
+    // 支持多页面
+    let containers: IContainerInfo[] = [];
+    let DataSourceTypes: any = [];
+    const schema: any = this.decodeSchema(schemaSrc);
+    if (!schema.pages) {
+      schema.pages = [];
+      const formatterPage: any = {
+        componentsMap: schema.componentsMap,
+        componentsTree: schema.componentsTree,
+      };
+      delete schema.componentsMap;
+      delete schema.componentsTree;
+      console.log(JSON.stringify(formatterPage), 'formatterPage...');
+      schema.pages.push(formatterPage);
     }
+    for (let i = 0; i < schema.pages.length; i++) {
+      let nowPage: any = schema.pages[i];
+      let containerItem: any;
+      DataSourceTypes = DataSourceTypes.concat(this.collectDataSourcesTypes(nowPage));
+      // 解析三方组件依赖
+      nowPage.componentsMap.forEach((info: any) => {
+        if (info.componentName) {
+          compDeps[info.componentName] = {
+            ...info,
+            dependencyType: DependencyType.External,
+            componentName: info.componentName,
+            exportName: info.exportName ?? info.componentName,
+            version: info.version || '*',
+            destructuring: info.destructuring ?? false,
+          };
+        }
+      });
 
+      // let containers: IContainerInfo[];
+      // Test if this is a lowcode component without container
+      if (nowPage.componentsTree.length > 0) {
+        const firstRoot: IPublicTypeContainerSchema = nowPage
+          .componentsTree[0] as IPublicTypeContainerSchema;
+
+        if (!firstRoot.fileName && !isValidContainerType(firstRoot)) {
+          // 整个 nowPage 描述一个容器，且无根节点定义
+          const container: IContainerInfo = {
+            ...firstRoot,
+            ...defaultContainer,
+            props: firstRoot.props || defaultContainer.props,
+            css: firstRoot.css || defaultContainer.css,
+            moduleName: (firstRoot as IContainerInfo).moduleName || defaultContainer.moduleName,
+            children: nowPage.componentsTree as IPublicTypeNodeSchema[],
+          };
+          containerItem = [container];
+        } else {
+          // 普通带 1 到多个容器的 nowPage
+          containerItem = nowPage.componentsTree.map((n: any) => {
+            const subRoot = n as IPublicTypeContainerSchema;
+            const container: IContainerInfo = {
+              ...subRoot,
+              componentName: getRootComponentName(subRoot.componentName, compDeps),
+              containerType: subRoot.componentName,
+              moduleName: ensureValidClassName(changeCase.pascalCase(subRoot.fileName)),
+            };
+            return container;
+          });
+        }
+      } else {
+        throw new CodeGeneratorError("Can't find anything to generate.");
+      }
+      containers = containers.concat(containerItem);
+    }
     // 分析引用能力的依赖
     containers = containers.map((con) => ({
       ...con,
@@ -226,11 +238,12 @@ export class SchemaParser implements ISchemaParser {
       }
     });
 
+    // 分析容器内部组件依赖
     containers.forEach((container) => {
       const depNames = this.getComponentNames(container);
       // eslint-disable-next-line no-param-reassign
       container.deps = uniqueArray<string>(depNames, (i: string) => i)
-        .map((depName) => getInternalDep(internalDeps, depName) || compDeps[depName])
+        .map((depName) => internalDeps[depName] || compDeps[depName])
         .filter(Boolean);
       // container.deps = Object.keys(compDeps).map((depName) => compDeps[depName]);
     });
@@ -265,10 +278,11 @@ export class SchemaParser implements ISchemaParser {
       utils = schema.utils;
       utilsDeps = schema.utils
         .filter(
-          (u): u is { name: string; type: 'npm' | 'tnpm'; content: IPublicTypeNpmInfo } => u.type !== 'function',
+          (u: any): u is { name: string; type: 'npm' | 'tnpm'; content: IPublicTypeNpmInfo } =>
+            u.type !== 'function',
         )
         .map(
-          (u): IExternalDependency => ({
+          (u: any): IExternalDependency => ({
             ...u.content,
             componentName: u.name,
             version: u.content.version || '*',
@@ -324,7 +338,7 @@ export class SchemaParser implements ISchemaParser {
         containersDeps,
         utilsDeps,
         packages: npms || [],
-        dataSourcesTypes: this.collectDataSourcesTypes(schema),
+        dataSourcesTypes: DataSourceTypes,
         projectRemark: this.getProjectRemark(containers),
       },
     };
@@ -371,13 +385,13 @@ export class SchemaParser implements ISchemaParser {
     const defaultDataSourceType = 'fetch';
 
     // 收集应用级别的数据源
-    schema.dataSource?.list?.forEach((ds) => {
+    schema.dataSource?.list?.forEach((ds: any) => {
       dataSourcesTypes.add(ds.type || defaultDataSourceType);
     });
 
     // 收集容器级别的数据源（页面/组件/区块）
     schema.componentsTree.forEach((rootNode) => {
-      rootNode.dataSource?.list?.forEach((ds) => {
+      rootNode.dataSource?.list?.forEach((ds: any) => {
         dataSourcesTypes.add(ds.type || defaultDataSourceType);
       });
     });
