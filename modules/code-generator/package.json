@@ -1,6 +1,6 @@
 {
   "name": "zz-lowcode-code-generator",
-  "version": "1.1.2",
+  "version": "1.1.6",
   "description": "出码引擎 for LowCode Engine",
   "license": "MIT",
   "main": "lib/index.js",
@@ -41,9 +41,9 @@
     "test:cov": "jest --coverage",
     "test:update-snapshots": "cross-env UPDATE_EXPECTED=true jest -u",
     "analyze:standalone": "ANALYZE=true node scripts/build-standalone",
-    "release:beta": "standard-version -t @alilc/lowcode-code-generator\\@ -r patch --prerelease beta && git push --follow-tags && npm publish --tag beta",
-    "release:patch": "standard-version -t @alilc/lowcode-code-generator\\@ -r patch && git push --follow-tags && npm publish",
-    "release:minor": "standard-version -t @alilc/lowcode-code-generator\\@ -r minor && git push --follow-tags && npm publish",
+    "release:beta": "standard-version -t zz-lowcode-code-generator\\@ -r patch --prerelease beta && git push --follow-tags && npm publish --tag beta",
+    "release:patch": "standard-version -t zz-lowcode-code-generator\\@ -r patch && git push --follow-tags && npm publish",
+    "release:minor": "standard-version -t zz-lowcode-code-generator\\@ -r minor && git push --follow-tags && npm publish",
     "prepublishOnly": "npm run build",
     "demo": "node bin/lowcode-code-generator.js -i example-schema.json -o demo -s icejs",
     "more": "node bin/lowcode-code-generator.js -i demo-schema.json -o generatedPages -s icejs"

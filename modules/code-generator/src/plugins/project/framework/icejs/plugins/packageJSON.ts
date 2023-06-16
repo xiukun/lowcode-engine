@@ -56,14 +56,14 @@ const pluginFactory: BuilderComponentPluginFactory<IceJsPackageJsonPluginConfig>
     const ir = next.ir as IProjectInfo;
 
     const packageJson: IIceJsPackageJSON = {
-      name: cfg?.packageName || 'icejs-demo-app',
-      version: cfg?.packageVersion || '0.1.5',
+      name: cfg?.packageName || 'zz-icejs-demo-app',
+      version: cfg?.packageVersion || '1.1.5',
       description: '轻量级模板，使用 JavaScript，仅包含基础的 Layout。',
       dependencies: {
         antd: '4.24.8',
         moment: '^2.24.0',
-        react: '^16.4.1',
-        'react-dom': '^16.4.1',
+        react: '^16.x',
+        'react-dom': '^16.x',
         'react-router': '^5.2.1',
         '@alifd/theme-design-pro': '^0.x',
         'intl-messageformat': '^9.3.6',
