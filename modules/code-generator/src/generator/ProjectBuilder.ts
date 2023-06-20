@@ -22,6 +22,7 @@ interface IModuleInfo {
   moduleName?: string;
   path: string[];
   files: ResultFile[];
+  title?: string;
 }
 
 export interface ProjectBuilderInitOptions {

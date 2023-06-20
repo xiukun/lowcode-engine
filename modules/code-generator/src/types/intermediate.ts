@@ -35,6 +35,7 @@ export interface IRouterInfo extends IWithDependency {
     path: string;
     fileName: string;
     componentName: string;
+    title?: string;
   }>;
 }
 
@@ -42,7 +43,6 @@ export interface IRouterInfo extends IWithDependency {
  * project's remarks
  */
 export interface ProjectRemark {
-
   /** if current project only contain one container which type is `Component` */
   isSingleComponent?: boolean;
 }
@@ -62,6 +62,7 @@ export interface IProjectInfo {
 
 export interface IPageMeta {
   router?: string;
+  title?: string;
 }
 
 /**

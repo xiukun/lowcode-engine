@@ -28,7 +28,7 @@ const pluginFactory: BuilderComponentPluginFactory<unknown> = () => {
           .map(
             (route) => `
                 {
-                  name: 'Dashboard',
+                  name: '${route.title}',
                   path: '${route.path}',
                   icon: 'smile',
                 },

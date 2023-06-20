@@ -132,7 +132,6 @@ export class SchemaParser implements ISchemaParser {
       };
       delete schema.componentsMap;
       delete schema.componentsTree;
-      console.log(JSON.stringify(formatterPage), 'formatterPage...');
       schema.pages.push(formatterPage);
     }
     for (let i = 0; i < schema.pages.length; i++) {
@@ -257,6 +256,7 @@ export class SchemaParser implements ISchemaParser {
           return {
             path: (meta as IPageMeta).router || `/${page.fileName}`, // 如果无法找到页面路由信息，则用 fileName 做兜底
             fileName: page.fileName,
+            title: (meta as IPageMeta).title || `${page.fileName}`,
             componentName: page.moduleName,
           };
         }
