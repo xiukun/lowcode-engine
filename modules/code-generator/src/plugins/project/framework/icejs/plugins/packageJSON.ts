@@ -70,6 +70,7 @@ const pluginFactory: BuilderComponentPluginFactory<IceJsPackageJsonPluginConfig>
         '@ice/store': '^1.4.3',
         '@loadable/component': '^5.15.2',
         'zhizhou-material': '^0.2.3',
+        zustand: '^4.3.8',
 
         // 数据源相关的依赖:
         ...buildDataSourceDependencies(ir, cfg?.datasourceConfig),
